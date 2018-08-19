@@ -39,13 +39,6 @@ def make_node(name, normal = -1, warning = -1, danger = -1, children = [], notic
     node["metrics"] = make_metrics(normal, warning, danger)
   return node
 
-def make_n(name, normal = -1, warning = -1, danger = -1):
-  node = {}
-  node["name"] = name
-  if (not (normal != -1 and warning != -1 and danger != -1)):
-    node["metrics"] = make_metrics(normal, warning, danger)
-  return node
-
 def make_conn(src, trg, normal = -1, warning = -1, danger = -1, notices = []):
   streaming = {}
   streaming["streaming"] = 1
@@ -74,6 +67,7 @@ def check_for_notices_conn(conn_data = {}):
   if (conn_data["event_count"] > 20):
     n.append(make_notice("RPS slightly high at {0}".format(conn_data["event_count"])))
   return n
+
 
 
 def parse_metrics_json(data, exclude_orgs = [], only_orgs = []):
