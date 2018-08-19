@@ -4,8 +4,19 @@ import calendar
 import time
 import json
 import ssl
-import urllib2
+from urllib2 import urlopen
 from pprint import pprint
+
+
+
+def app(environ, start_response):
+  data = main()
+  start_response("200 OK", [
+      ("Content-Type", "application/json"),
+      ("Content-Length", str(len(data)))
+  ])
+  return iter([data])
+
 
 
 
@@ -157,69 +168,70 @@ def parse_metrics_json(data, exclude_orgs = [], only_orgs = []):
 
 
 
+def main():
 
-
-# INTERNET Region, aka ROOT node
-n_internet = {}
-n_internet["renderer"] = "region"
-n_internet["name"] = "INTERNET"
-n_internet["displayName"] = "INTERNET"
-n_internet["nodes"] = []
-n_internet["connections"] = []
-n_internet["class"] = "normal"
-n_internet["metadata"] = {}
-
-
-
-
-# Read the response from app-metrics-nozzle from a file (for now)
-#with open('apps.json') as f:
-#  json_data = json.load(f)
-# Old read from local file test
-
-
-pcf1_link = "https://app-metrics-nozzle.apps.az.dav3.io/api/apps"
-myssl = ssl.create_default_context()
-myssl.check_hostname=False
-myssl.verify_mode=ssl.CERT_NONE
-response = urllib2.urlopen(pcf1_link, context=myssl)
-json_data = json.load(response)
-
-
-n_pcf1 = parse_metrics_json(json_data)
-n_pcf2 = parse_metrics_json(json_data, exclude_orgs=["system"])
-
-# Label the Foundtion data
-n_pcf1["name"] = "pcf-az-central"
-n_pcf1["displayName"] = "Azure CentralUS"
-
-n_pcf2["name"] = "pcf-az-useast"
-n_pcf2["displayName"] = "Azure USEast"
+  # INTERNET Region, aka ROOT node
+  n_internet = {}
+  n_internet["renderer"] = "region"
+  n_internet["name"] = "INTERNET"
+  n_internet["displayName"] = "INTERNET"
+  n_internet["nodes"] = []
+  n_internet["connections"] = []
+  n_internet["class"] = "normal"
+  n_internet["metadata"] = {}
 
 
 
-# Create the Global connections from the INTERNET to each PCF Foundation
-conn1 = {}
-conn1["source"] = "INTERNET"
-conn1["target"] = "pcf-az-central"
-conn1["class"] = "normal"
-conn1["notices"] = []
-conn1["metrics"] = make_metrics(n_pcf1["maxVolume"], 0.017, 5)
 
-conn2 = {}
-conn2["source"] = "INTERNET"
-conn2["target"] = "pcf-az-useast"
-conn2["class"] = "normal"
-conn2["notices"] = []
-conn2["metrics"] = make_metrics(n_pcf2["maxVolume"], 0.014, 3)
+  # Read the response from app-metrics-nozzle from a file (for now)
+  #with open('apps.json') as f:
+  #  json_data = json.load(f)
+  # Old read from local file test
 
 
-d = {}
-d["renderer"] = "global"
-d["name"] = "edge"
-d["nodes"] = [n_internet, n_pcf1, n_pcf2]
-d["connections"] = [conn1, conn2]
-d["serverUpdateTime"] = int(round(time.time() * 1000))
+  myssl = ssl.create_default_context()
+  myssl.check_hostname=False
+  myssl.verify_mode=ssl.CERT_NONE
 
-print json.dumps(d, sort_keys=True, indent=2)
+  pcf1_link = "https://app-metrics-nozzle.apps.az.dav3.io/api/apps"
+  response = urlopen(pcf1_link, context=myssl)
+  json_data = json.load(response)
+
+
+  n_pcf1 = parse_metrics_json(json_data)
+  n_pcf2 = parse_metrics_json(json_data, exclude_orgs=["system"])
+
+  # Label the Foundtion data
+  n_pcf1["name"] = "pcf-az-central"
+  n_pcf1["displayName"] = "Azure CentralUS"
+
+  n_pcf2["name"] = "pcf-az-useast"
+  n_pcf2["displayName"] = "Azure USEast"
+
+
+
+  # Create the Global connections from the INTERNET to each PCF Foundation
+  conn1 = {}
+  conn1["source"] = "INTERNET"
+  conn1["target"] = "pcf-az-central"
+  conn1["class"] = "normal"
+  conn1["notices"] = []
+  conn1["metrics"] = make_metrics(n_pcf1["maxVolume"], 0.017, 5)
+
+  conn2 = {}
+  conn2["source"] = "INTERNET"
+  conn2["target"] = "pcf-az-useast"
+  conn2["class"] = "normal"
+  conn2["notices"] = []
+  conn2["metrics"] = make_metrics(n_pcf2["maxVolume"], 0.014, 3)
+
+
+  d = {}
+  d["renderer"] = "global"
+  d["name"] = "edge"
+  d["nodes"] = [n_internet, n_pcf1, n_pcf2]
+  d["connections"] = [conn1, conn2]
+  d["serverUpdateTime"] = int(round(time.time() * 1000))
+
+  return json.dumps(d, sort_keys=True, indent=2)
 

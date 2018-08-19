@@ -1,0 +1,4 @@
+name: vz-metrics-adapter
+dependencies:
+  - pip:
+      - gunicorn
