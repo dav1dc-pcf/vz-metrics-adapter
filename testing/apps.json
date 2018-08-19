@@ -1,0 +1,593 @@
+{
+  "system/autoscaling/autoscale": {
+    "buildpack": "binary_buildpack",
+    "diego": true,
+    "environment": null,
+    "environment_summary": {
+      "total_cpu": 0.94160724685681,
+      "total_disk_configured": 1073741824,
+      "total_disk_provisioned": -1073741824,
+      "total_disk_usage": 69722112,
+      "total_memory_configured": 268435456,
+      "total_memory_provisioned": 805306368,
+      "total_memory_usage": 16576512
+    },
+    "guid": "55b63615-fef6-48b9-a37c-d44fa4f10338",
+    "instance_count": {
+      "configured": 3,
+      "running": 3
+    },
+    "instances": [
+      {
+        "cell_ip": "192.168.4.13",
+        "cpu_usage": 0.2023533183892218,
+        "disk_usage": 23240704,
+        "gc_stats": "",
+        "index": 0,
+        "memory_usage": 5513216,
+        "uptime": 987,
+        "since": 1533838487,
+        "state": "RUNNING"
+      },
+      {
+        "cell_ip": "192.168.4.14",
+        "cpu_usage": 0.31386908228560334,
+        "disk_usage": 23240704,
+        "gc_stats": "",
+        "index": 1,
+        "memory_usage": 5525504,
+        "uptime": 987,
+        "since": 1533838487,
+        "state": "RUNNING"
+      },
+      {
+        "cell_ip": "192.168.4.13",
+        "cpu_usage": 0.190926359923436,
+        "disk_usage": 23240704,
+        "gc_stats": "",
+        "index": 2,
+        "memory_usage": 5328896,
+        "uptime": 987,
+        "since": 1533838487,
+        "state": "RUNNING"
+      }
+    ],
+    "name": "autoscale",
+    "organization": {
+      "id": "0b29a54d-3dce-422a-b32f-efdae8824157",
+      "name": "system"
+    },
+    "event_count": 0,
+    "last_event_time": 0,
+    "requests_per_second": 0,
+    "elapsed_since_last_event": 0,
+    "routes": [
+      "autoscale.sys.az.dav3.io"
+    ],
+    "space": {
+      "id": "295ceaa0-e37d-48c3-8090-c826254b7f3d",
+      "name": "autoscaling"
+    },
+    "state": "STARTED"
+  },
+  "system/autoscaling/autoscale-api": {
+    "buildpack": "java_buildpack_offline",
+    "diego": true,
+    "environment": null,
+    "environment_summary": {
+      "total_cpu": 0.16380301583034934,
+      "total_disk_configured": 1073741824,
+      "total_disk_provisioned": 1073741824,
+      "total_disk_usage": 200552448,
+      "total_memory_configured": 1073741824,
+      "total_memory_provisioned": 1073741824,
+      "total_memory_usage": 434720768
+    },
+    "guid": "6a95adf2-eb32-4108-bf5f-f566598d1e8d",
+    "instance_count": {
+      "configured": 1,
+      "running": 1
+    },
+    "instances": [
+      {
+        "cell_ip": "192.168.4.14",
+        "cpu_usage": 0.16380301583034934,
+        "disk_usage": 200552448,
+        "gc_stats": "",
+        "index": 0,
+        "memory_usage": 434720768,
+        "uptime": 3088,
+        "since": 1533836386,
+        "state": "RUNNING"
+      }
+    ],
+    "name": "autoscale-api",
+    "organization": {
+      "id": "0b29a54d-3dce-422a-b32f-efdae8824157",
+      "name": "system"
+    },
+    "event_count": 0,
+    "last_event_time": 0,
+    "requests_per_second": 0,
+    "elapsed_since_last_event": 0,
+    "routes": [
+      "autoscale.sys.az.dav3.io"
+    ],
+    "space": {
+      "id": "295ceaa0-e37d-48c3-8090-c826254b7f3d",
+      "name": "autoscaling"
+    },
+    "state": "STARTED"
+  },
+  "system/nfs/nfsbroker": {
+    "buildpack": "binary_buildpack",
+    "diego": true,
+    "environment": null,
+    "environment_summary": {
+      "total_cpu": 0,
+      "total_disk_configured": 1073741824,
+      "total_disk_provisioned": 1073741824,
+      "total_disk_usage": 10518528,
+      "total_memory_configured": 1073741824,
+      "total_memory_provisioned": 1073741824,
+      "total_memory_usage": 3342336
+    },
+    "guid": "12007ba6-f180-42a1-8409-b0ebe2865932",
+    "instance_count": {
+      "configured": 1,
+      "running": 1
+    },
+    "instances": [
+      {
+        "cell_ip": "192.168.4.14",
+        "cpu_usage": 0,
+        "disk_usage": 10518528,
+        "gc_stats": "",
+        "index": 0,
+        "memory_usage": 3342336,
+        "uptime": 3109,
+        "since": 1533836365,
+        "state": "RUNNING"
+      }
+    ],
+    "name": "nfsbroker",
+    "organization": {
+      "id": "0b29a54d-3dce-422a-b32f-efdae8824157",
+      "name": "system"
+    },
+    "event_count": 0,
+    "last_event_time": 0,
+    "requests_per_second": 0,
+    "elapsed_since_last_event": 0,
+    "routes": [
+      "nfsbroker.sys.az.dav3.io"
+    ],
+    "space": {
+      "id": "4d0de958-d544-43da-aedb-c5b342a2612d",
+      "name": "nfs"
+    },
+    "state": "STARTED"
+  },
+  "system/notifications-with-ui/notifications-ui": {
+    "buildpack": "binary_buildpack",
+    "diego": true,
+    "environment": null,
+    "environment_summary": {
+      "total_cpu": 0.005138130224649947,
+      "total_disk_configured": 1073741824,
+      "total_disk_provisioned": -2147483648,
+      "total_disk_usage": 27672576,
+      "total_memory_configured": 67108864,
+      "total_memory_provisioned": 134217728,
+      "total_memory_usage": 5488640
+    },
+    "guid": "f317ef05-721d-4e3b-8157-7c203e1f0368",
+    "instance_count": {
+      "configured": 2,
+      "running": 2
+    },
+    "instances": [
+      {
+        "cell_ip": "192.168.4.14",
+        "cpu_usage": 0.0025690651123249737,
+        "disk_usage": 13836288,
+        "gc_stats": "",
+        "index": 0,
+        "memory_usage": 2744320,
+        "uptime": 3118,
+        "since": 1533836355,
+        "state": "STOPPED"
+      },
+      {
+        "cell_ip": "192.168.4.13",
+        "cpu_usage": 0.0019205642240889545,
+        "disk_usage": 13836288,
+        "gc_stats": "",
+        "index": 1,
+        "memory_usage": 2863104,
+        "uptime": 3111,
+        "since": 1533836363,
+        "state": "RUNNING"
+      }
+    ],
+    "name": "notifications-ui",
+    "organization": {
+      "id": "0b29a54d-3dce-422a-b32f-efdae8824157",
+      "name": "system"
+    },
+    "event_count": 0,
+    "last_event_time": 0,
+    "requests_per_second": 0,
+    "elapsed_since_last_event": 0,
+    "routes": [
+      "notifications-ui.sys.az.dav3.io"
+    ],
+    "space": {
+      "id": "1fdfc029-e269-4c54-8c76-1f50e2db9b9d",
+      "name": "notifications-with-ui"
+    },
+    "state": "STARTED"
+  },
+  "system/system/app-usage-scheduler": {
+    "buildpack": "ruby_buildpack",
+    "diego": true,
+    "environment": null,
+    "environment_summary": {
+      "total_cpu": 0.01662525656558929,
+      "total_disk_configured": 1073741824,
+      "total_disk_provisioned": 1073741824,
+      "total_disk_usage": 204963840,
+      "total_memory_configured": 1073741824,
+      "total_memory_provisioned": 1073741824,
+      "total_memory_usage": 78884864
+    },
+    "guid": "08daba14-e0df-4cb0-9b25-3e68ea40ec66",
+    "instance_count": {
+      "configured": 1,
+      "running": 1
+    },
+    "instances": [
+      {
+        "cell_ip": "192.168.4.13",
+        "cpu_usage": 0.01662525656558929,
+        "disk_usage": 204963840,
+        "gc_stats": "",
+        "index": 0,
+        "memory_usage": 78884864,
+        "uptime": 3119,
+        "since": 1533836353,
+        "state": "RUNNING"
+      }
+    ],
+    "name": "app-usage-scheduler",
+    "organization": {
+      "id": "0b29a54d-3dce-422a-b32f-efdae8824157",
+      "name": "system"
+    },
+    "event_count": 0,
+    "last_event_time": 0,
+    "requests_per_second": 0,
+    "elapsed_since_last_event": 0,
+    "routes": null,
+    "space": {
+      "id": "da999604-9e88-4826-b5f4-f13af9e2615a",
+      "name": "system"
+    },
+    "state": "STARTED"
+  },
+  "system/system/app-usage-server": {
+    "buildpack": "ruby_buildpack",
+    "diego": true,
+    "environment": null,
+    "environment_summary": {
+      "total_cpu": 0.022813380330516275,
+      "total_disk_configured": 1073741824,
+      "total_disk_provisioned": -2147483648,
+      "total_disk_usage": 409935872,
+      "total_memory_configured": 1073741824,
+      "total_memory_provisioned": -2147483648,
+      "total_memory_usage": 152199168
+    },
+    "guid": "084b3eae-f342-43e1-aab5-5b09dce58ee1",
+    "instance_count": {
+      "configured": 2,
+      "running": 2
+    },
+    "instances": [
+      {
+        "cell_ip": "192.168.4.13",
+        "cpu_usage": 0.010043995424096869,
+        "disk_usage": 204967936,
+        "gc_stats": "",
+        "index": 0,
+        "memory_usage": 76189696,
+        "uptime": 3104,
+        "since": 1533836369,
+        "state": "RUNNING"
+      },
+      {
+        "cell_ip": "192.168.4.14",
+        "cpu_usage": 0.011406690165258138,
+        "disk_usage": 204967936,
+        "gc_stats": "",
+        "index": 1,
+        "memory_usage": 76099584,
+        "uptime": 3102,
+        "since": 1533836371,
+        "state": "RUNNING"
+      }
+    ],
+    "name": "app-usage-server",
+    "organization": {
+      "id": "0b29a54d-3dce-422a-b32f-efdae8824157",
+      "name": "system"
+    },
+    "event_count": 0,
+    "last_event_time": 0,
+    "requests_per_second": 0,
+    "elapsed_since_last_event": 0,
+    "routes": [
+      "app-usage.sys.az.dav3.io"
+    ],
+    "space": {
+      "id": "da999604-9e88-4826-b5f4-f13af9e2615a",
+      "name": "system"
+    },
+    "state": "STARTED"
+  },
+  "system/system/app-usage-worker": {
+    "buildpack": "ruby_buildpack",
+    "diego": true,
+    "environment": null,
+    "environment_summary": {
+      "total_cpu": 0.037254660785085485,
+      "total_disk_configured": 1073741824,
+      "total_disk_provisioned": 1073741824,
+      "total_disk_usage": 204967936,
+      "total_memory_configured": -2147483648,
+      "total_memory_provisioned": -2147483648,
+      "total_memory_usage": 96362496
+    },
+    "guid": "2735a136-b147-4de6-9356-bd30bb33b14f",
+    "instance_count": {
+      "configured": 1,
+      "running": 1
+    },
+    "instances": [
+      {
+        "cell_ip": "192.168.4.14",
+        "cpu_usage": 0.037254660785085485,
+        "disk_usage": 204967936,
+        "gc_stats": "",
+        "index": 0,
+        "memory_usage": 96362496,
+        "uptime": 3119,
+        "since": 1533836354,
+        "state": "RUNNING"
+      }
+    ],
+    "name": "app-usage-worker",
+    "organization": {
+      "id": "0b29a54d-3dce-422a-b32f-efdae8824157",
+      "name": "system"
+    },
+    "event_count": 0,
+    "last_event_time": 0,
+    "requests_per_second": 0,
+    "elapsed_since_last_event": 0,
+    "routes": null,
+    "space": {
+      "id": "da999604-9e88-4826-b5f4-f13af9e2615a",
+      "name": "system"
+    },
+    "state": "STARTED"
+  },
+  "system/system/apps-manager-js-green": {
+    "buildpack": "staticfile_buildpack",
+    "diego": true,
+    "environment": null,
+    "environment_summary": {
+      "total_cpu": 0,
+      "total_disk_configured": 1073741824,
+      "total_disk_provisioned": -2147483648,
+      "total_disk_usage": 21143552,
+      "total_memory_configured": 134217728,
+      "total_memory_provisioned": 268435456,
+      "total_memory_usage": 7012352
+    },
+    "guid": "b42a3ba5-335a-473c-b83b-2a993cbf8f80",
+    "instance_count": {
+      "configured": 2,
+      "running": 2
+    },
+    "instances": [
+      {
+        "cell_ip": "192.168.4.13",
+        "cpu_usage": 0,
+        "disk_usage": 10571776,
+        "gc_stats": "",
+        "index": 0,
+        "memory_usage": 3698688,
+        "uptime": 3118,
+        "since": 1533836355,
+        "state": "RUNNING"
+      },
+      {
+        "cell_ip": "192.168.4.14",
+        "cpu_usage": 0,
+        "disk_usage": 10571776,
+        "gc_stats": "",
+        "index": 1,
+        "memory_usage": 3506176,
+        "uptime": 3106,
+        "since": 1533836367,
+        "state": "RUNNING"
+      }
+    ],
+    "name": "apps-manager-js-green",
+    "organization": {
+      "id": "0b29a54d-3dce-422a-b32f-efdae8824157",
+      "name": "system"
+    },
+    "event_count": 0,
+    "last_event_time": 0,
+    "requests_per_second": 0,
+    "elapsed_since_last_event": 0,
+    "routes": [
+      "apps.sys.az.dav3.io"
+    ],
+    "space": {
+      "id": "da999604-9e88-4826-b5f4-f13af9e2615a",
+      "name": "system"
+    },
+    "state": "STARTED"
+  },
+  "system/system/p-invitations-green": {
+    "buildpack": "nodejs",
+    "diego": true,
+    "environment": null,
+    "environment_summary": {
+      "total_cpu": 0,
+      "total_disk_configured": 1073741824,
+      "total_disk_provisioned": 1073741824,
+      "total_disk_usage": 73142272,
+      "total_memory_configured": 268435456,
+      "total_memory_provisioned": 268435456,
+      "total_memory_usage": 28356608
+    },
+    "guid": "93cd1b0a-e9fa-401b-9dd0-99d8e0651932",
+    "instance_count": {
+      "configured": 1,
+      "running": 1
+    },
+    "instances": [
+      {
+        "cell_ip": "192.168.4.14",
+        "cpu_usage": 0,
+        "disk_usage": 73142272,
+        "gc_stats": "",
+        "index": 0,
+        "memory_usage": 28356608,
+        "uptime": 3106,
+        "since": 1533836367,
+        "state": "RUNNING"
+      }
+    ],
+    "name": "p-invitations-green",
+    "organization": {
+      "id": "0b29a54d-3dce-422a-b32f-efdae8824157",
+      "name": "system"
+    },
+    "event_count": 0,
+    "last_event_time": 0,
+    "requests_per_second": 0,
+    "elapsed_since_last_event": 0,
+    "routes": [
+      "p-invitations-green.apps.az.dav3.io",
+      "p-invitations.sys.az.dav3.io"
+    ],
+    "space": {
+      "id": "da999604-9e88-4826-b5f4-f13af9e2615a",
+      "name": "system"
+    },
+    "state": "STARTED"
+  },
+  "testing/sample-apps/spring-music": {
+    "buildpack": "client-certificate-mapper=1.6.0_RELEASE container-security-provider=1.14.0_RELEASE java-buildpack=\u001b[34mv4.13.1\u001b[0m-offline-https://github.com/cloudfoundry/java-buildpack.git#4644847 java-main java-opts java-security jvmkill-agent=1.16.0_RELEASE open-jd...",
+    "diego": true,
+    "environment": null,
+    "environment_summary": {
+      "total_cpu": 6.184500188856382,
+      "total_disk_configured": 1073741824,
+      "total_disk_provisioned": 1073741824,
+      "total_disk_usage": 178405376,
+      "total_memory_configured": 1073741824,
+      "total_memory_provisioned": 1073741824,
+      "total_memory_usage": 427626496
+    },
+    "guid": "1b66c07d-21a9-4192-ab39-0cdc35d34f4e",
+    "instance_count": {
+      "configured": 1,
+      "running": 1
+    },
+    "instances": [
+      {
+        "cell_ip": "192.168.4.13",
+        "cpu_usage": 6.184500188856382,
+        "disk_usage": 178405376,
+        "gc_stats": "",
+        "index": 0,
+        "memory_usage": 427626496,
+        "uptime": 3099,
+        "since": 1533836375,
+        "state": "RUNNING"
+      }
+    ],
+    "name": "spring-music",
+    "organization": {
+      "id": "198d9cbb-1dbe-456a-aa37-0e23c9abac4a",
+      "name": "testing"
+    },
+    "event_count": 48,
+    "last_event_time": 1533839608189956259,
+    "requests_per_second": 0.36923076923076925,
+    "elapsed_since_last_event": 0,
+    "routes": [
+      "spring-music-relaxed-panda.apps.az.dav3.io"
+    ],
+    "space": {
+      "id": "0e3f15e1-d420-4d7d-91b8-2d0ecc1acb2c",
+      "name": "sample-apps"
+    },
+    "state": "STARTED"
+  },
+  "vizceral/nozzle-metrics/app-metrics-nozzle": {
+    "buildpack": "https://github.com/cloudfoundry/go-buildpack.git",
+    "diego": true,
+    "environment": null,
+    "environment_summary": {
+      "total_cpu": 0.33240177775113666,
+      "total_disk_configured": 1073741824,
+      "total_disk_provisioned": 1073741824,
+      "total_disk_usage": 19881984,
+      "total_memory_configured": 1073741824,
+      "total_memory_provisioned": 1073741824,
+      "total_memory_usage": 11780096
+    },
+    "guid": "5e8ff6e4-3939-4e4b-8db9-f39b2c0ad50a",
+    "instance_count": {
+      "configured": 1,
+      "running": 1
+    },
+    "instances": [
+      {
+        "cell_ip": "192.168.4.13",
+        "cpu_usage": 0.33240177775113666,
+        "disk_usage": 19881984,
+        "gc_stats": "",
+        "index": 0,
+        "memory_usage": 11780096,
+        "uptime": 2,
+        "since": 1533839472,
+        "state": "RUNNING"
+      }
+    ],
+    "name": "app-metrics-nozzle",
+    "organization": {
+      "id": "7f5d679d-4bbf-46b1-adc4-af394fc0166d",
+      "name": "vizceral"
+    },
+    "event_count": 3,
+    "last_event_time": 1533839623403934468,
+    "requests_per_second": 0.02054794520547945,
+    "elapsed_since_last_event": 0,
+    "routes": [
+      "app-metrics-nozzle.apps.az.dav3.io"
+    ],
+    "space": {
+      "id": "18f9718f-e2cc-4801-88e6-4d3a9296965c",
+      "name": "nozzle-metrics"
+    },
+    "state": "STARTED"
+  }
+}
