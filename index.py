@@ -4,7 +4,7 @@ import calendar
 import time
 import json
 import ssl
-from urllib2 import urlopen
+import urllib.request
 from pprint import pprint
 
 
@@ -16,10 +16,6 @@ def app(environ, start_response):
       ("Content-Length", str(len(data)))
   ])
   return iter([data])
-
-
-
-
 
 def make_metrics(normal = -1, warning = -1, danger = -1):
   metrics = {}
@@ -194,7 +190,7 @@ def main():
   myssl.verify_mode=ssl.CERT_NONE
 
   pcf1_link = "https://app-metrics-nozzle.apps.az.dav3.io/api/apps"
-  response = urlopen(pcf1_link, context=myssl)
+  response = urllib.request.urlopen(pcf1_link, context=myssl)
   json_data = json.load(response)
 
 
