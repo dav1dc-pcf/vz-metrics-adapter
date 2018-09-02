@@ -15,7 +15,7 @@ def app(environ, start_response):
       ("Content-Type", "application/json"),
       ("Content-Length", str(len(data)))
   ])
-  return iter([data])
+  return [bytes(data, 'utf-8')]
 
 def make_metrics(normal = -1, warning = -1, danger = -1):
   metrics = {}
