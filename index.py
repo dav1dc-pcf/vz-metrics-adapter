@@ -13,7 +13,10 @@ def app(environ, start_response):
   data = main()
   start_response("200 OK", [
       ("Content-Type", "application/json"),
-      ("Content-Length", str(len(data)))
+      ("Content-Length", str(len(data))),
+      ("Access-Control-Allow-Origin", "*"),
+      ("Access-Control-Expose-Headers", "Access-Control-Allow-Origin"),
+      ("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
   ])
   return [bytes(data, 'utf-8')]
 
@@ -64,7 +67,7 @@ def make_conn(src, trg, normal = -1, warning = -1, danger = -1, notices = []):
 def check_for_notices_node(inst_data = {}):
   n = []
   # What kind of notices/alerts can we generate for the NODE??
-  if (int(inst_data["cpu_usage"]) > 5):
+  if (int(inst_data["cpu_usage"]) > 25):
     n.append(make_notice("CPU usage is slightly high at {0}".format(inst_data["cpu_usage"])))
   if (inst_data["state"] != "RUNNING"):
     n.append(make_notice("Instance is not in a RUNNING state!", 2))
@@ -73,7 +76,7 @@ def check_for_notices_node(inst_data = {}):
 def check_for_notices_conn(conn_data = {}):
   n = []
   # What kind of notices/alerts can we generate for the Connection??
-  if (conn_data["event_count"] > 20):
+  if (conn_data["event_count"] > 100):
     n.append(make_notice("RPS slightly high at {0}".format(conn_data["event_count"])))
   return n
 
