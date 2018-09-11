@@ -3,5 +3,6 @@ applications:
 - name: vz-metrics-adapter
   memory: 512M
   instances: 1
-  buildpack: python_buildpack
+  buildpacks:
+  - python_buildpack
   command: gunicorn index:app
