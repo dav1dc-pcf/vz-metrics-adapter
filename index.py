@@ -83,12 +83,6 @@ def check_for_notices_conn(conn_data = {}):
 
 
 def parse_metrics_json(data, exclude_orgs = [], only_orgs = []):
-  # Make some GO Routers (statically set to 3 for the time being)
-  n_rtr1 = make_node("rtr1")
-  n_rtr2 = make_node("rtr2")
-  n_rtr3 = make_node("rtr3")
-  routers = [n_rtr1, n_rtr2, n_rtr3]
-
   # A Place for some Diego Cells
   cells = {}
   cell_traffic = {}
@@ -101,6 +95,8 @@ def parse_metrics_json(data, exclude_orgs = [], only_orgs = []):
   nodes = []
   routes = {}
   volume = 0
+  http_good = 0
+  http_bad = 0
 
   for key in data:
     # Check to see if we want to exclude applications within this ORG
@@ -109,44 +105,42 @@ def parse_metrics_json(data, exclude_orgs = [], only_orgs = []):
     # Check to see if only_orgs is non-empty, in which case we only want a specific collection or ORGs
     if (len(only_orgs) > 0 and data[key]["organization"]["name"] not in only_orgs):
       continue
-    # The total volume is inflated slightly by adding 10 for every application processed (for testing purposes)
-    volume = volume + data[key]["event_count"] + 10
+    # The total volume of traffic for this foundation
+    traffic = (data[key]["http_good_count"] + data[key]["http_error_count"])
+    volume = volume + traffic
+    http_good = http_good + data[key]["http_good_count"]
+    http_bad = http_bad + data[key]["http_error_count"]
     for inst in data[key]["instances"]:
       # Create a Node for the AI
       inst_name = "{0}/{1}".format(key, inst["index"])
-      app_inst = make_node(inst_name, data[key]["event_count"])
+      app_inst = make_node(inst_name, traffic)
       app_inst["notices"] = check_for_notices_node(inst)
       app_instances.append(app_inst)
       # Create a Connection between the Reported Cell IP and the AI Name
-      c = make_conn(inst["cell_ip"], inst_name, int(10 + data[key]["event_count"]))
+      c = make_conn(inst_name, inst["cell_ip"], traffic)
       c["notices"] = check_for_notices_conn(data[key])
       connections.append(c)
       # Also Keep track of the Cell Nodes, we will append these to the master list later
       cells[inst["cell_ip"]] = make_node(inst["cell_ip"])
-      cell_traffic[inst["cell_ip"]] = cell_traffic.get(inst["cell_ip"], 0) + int(10 + data[key]["event_count"])
+      cell_traffic[inst["cell_ip"]] = cell_traffic.get(inst["cell_ip"], 0) + traffic
       # Also extract an routes, and create a connection between the route and the AI
       if (data[key]["routes"] != None):
         for r in data[key]["routes"]:
           routes[r] = r
-          connections.append(make_conn(r, inst_name, int(10 + data[key]["event_count"])))
+          connections.append(make_conn(r, inst_name, traffic))
 
   # Copy the whole list of AI's as a starting point for the master node list
   nodes = app_instances
-  # Append the list of Routers to the master node list
-  for rtr in routers:
-    nodes.append(rtr)
 
   # Append the list of application routes to the master node list, also creating connections to the INTERNET
   for rou in routes:
     nodes.append(make_node(rou))
-    connections.append(make_conn("INTERNET", rou, 10))
+    connections.append(make_conn("INTERNET", rou, 100))
 
-  # Append remaining nodes to the master list, and create connections between the routers <-> cells & INTERNET <-> routers
+  # Append remaining nodes to the master list
   for cell in cells:
     nodes.append(cells[cell])
-    for rtr in routers:
-      connections.append(make_conn(rtr["name"], cell, int(cell_traffic.get(cell, 100)/3)))
-      connections.append(make_conn("INTERNET", rtr["name"], 1000))
+
 
   # The resulting Region can now take shape
   n_pcf = {}
@@ -158,12 +152,17 @@ def parse_metrics_json(data, exclude_orgs = [], only_orgs = []):
   n_pcf["updated"] = int(round(time.time() * 1000))
   n_pcf["props"] = {}
   n_pcf["maxVolume"] = volume
+  n_pcf["http_good"] = http_good
+  n_pcf["http_bad"] = http_bad
+  if (volume == 0):
+    n_pcf["error_rate"] = 0.0
+  else:
+    n_pcf["error_rate"] = (http_bad / volume)
 
   # return the completed object representation
   return n_pcf
 
 # END parse_metrics_json
-
 
 
 
@@ -179,57 +178,63 @@ def main():
   n_internet["class"] = "normal"
   n_internet["metadata"] = {}
 
+  # Define the foundations to process in an array
+  foundations = {}
 
+  # First Foundation
+  pcf_one = {}
+  pcf_one["name"] = "pcf-az-central-system"
+  pcf_one["displayName"] = "Azure CentralUS [system]"
+  pcf_one["json_url"] = "https://app-metrics-nozzle.apps.az.dav3.io/api/apps"
+  pcf_one["exclude_orgs"] = []
+  pcf_one["only_orgs"] = ["system"]
 
+  # Second Foundation (which is really just the first, repeated with different filters)
+  pcf_two = {}
+  pcf_two["name"] = "pcf-az-central-non-system"
+  pcf_two["displayName"] = "Azure CentralUS [non-system]"
+  pcf_two["json_url"] = "https://app-metrics-nozzle.apps.az.dav3.io/api/apps"
+  pcf_two["exclude_orgs"] = ["system"] 
+  pcf_two["only_orgs"] = []
 
-  # Read the response from app-metrics-nozzle from a file (for now)
-  #with open('apps.json') as f:
-  #  json_data = json.load(f)
-  # Old read from local file test
+  foundations[pcf_one["name"]] = pcf_one
+  foundations[pcf_two["name"]] = pcf_two
 
-
+  # Ensure that we can read from sites using self-signed SSL
   myssl = ssl.create_default_context()
   myssl.check_hostname=False
   myssl.verify_mode=ssl.CERT_NONE
 
-  pcf1_link = "https://app-metrics-nozzle.apps.az.dav3.io/api/apps"
-  response = urllib.request.urlopen(pcf1_link, context=myssl)
-  json_data = json.load(response)
+  # A place for all the data we process
+  d_conns = []
+  d_nodes = []
 
+  # The INTERNET node should be the first in the list
+  d_nodes.append(n_internet)
 
-  n_pcf1 = parse_metrics_json(json_data)
-  n_pcf2 = parse_metrics_json(json_data, exclude_orgs=["system"])
+  for site_name in foundations:
+    response = urllib.request.urlopen(foundations[site_name]["json_url"], context=myssl)
+    json_data = json.load(response)
+    site_data = parse_metrics_json(json_data, only_orgs=foundations[site_name]["only_orgs"], exclude_orgs=foundations[site_name]["exclude_orgs"])
+    site_data["name"] = site_name
+    site_data["displayName"] = foundations[site_name]["displayName"]
+    # Create the Global connections from the INTERNET to the PCF Foundation
+    conn1 = {}
+    conn1["source"] = "INTERNET"
+    conn1["target"] = site_name
+    conn1["class"] = "normal"
+    conn1["notices"] = []
+    conn1["metrics"] = make_metrics(site_data["maxVolume"], site_data["error_rate"], int(site_data["maxVolume"] * site_data["error_rate"]) )
 
-  # Label the Foundtion data
-  n_pcf1["name"] = "pcf-az-central"
-  n_pcf1["displayName"] = "Azure CentralUS"
-
-  n_pcf2["name"] = "pcf-az-useast"
-  n_pcf2["displayName"] = "Azure USEast"
-
-
-
-  # Create the Global connections from the INTERNET to each PCF Foundation
-  conn1 = {}
-  conn1["source"] = "INTERNET"
-  conn1["target"] = "pcf-az-central"
-  conn1["class"] = "normal"
-  conn1["notices"] = []
-  conn1["metrics"] = make_metrics(n_pcf1["maxVolume"], 0.017, 5)
-
-  conn2 = {}
-  conn2["source"] = "INTERNET"
-  conn2["target"] = "pcf-az-useast"
-  conn2["class"] = "normal"
-  conn2["notices"] = []
-  conn2["metrics"] = make_metrics(n_pcf2["maxVolume"], 0.014, 3)
-
+    d_conns.append(conn1)
+    d_nodes.append(site_data)
+  # END for
 
   d = {}
   d["renderer"] = "global"
   d["name"] = "edge"
-  d["nodes"] = [n_internet, n_pcf1, n_pcf2]
-  d["connections"] = [conn1, conn2]
+  d["nodes"] = d_nodes
+  d["connections"] = d_conns
   d["serverUpdateTime"] = int(round(time.time() * 1000))
 
   return json.dumps(d, sort_keys=True, indent=2)
