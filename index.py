@@ -110,24 +110,25 @@ def parse_metrics_json(data, exclude_orgs = [], only_orgs = []):
     volume = volume + traffic
     http_good = http_good + data[key]["http_good_count"]
     http_bad = http_bad + data[key]["http_error_count"]
-    for inst in data[key]["instances"]:
-      # Create a Node for the AI
-      inst_name = "{0}/{1}".format(key, inst["index"])
-      app_inst = make_node(inst_name, traffic)
-      app_inst["notices"] = check_for_notices_node(inst)
-      app_instances.append(app_inst)
-      # Create a Connection between the Reported Cell IP and the AI Name
-      c = make_conn(inst_name, inst["cell_ip"], traffic)
-      c["notices"] = check_for_notices_conn(data[key])
-      connections.append(c)
-      # Also Keep track of the Cell Nodes, we will append these to the master list later
-      cells[inst["cell_ip"]] = make_node(inst["cell_ip"])
-      cell_traffic[inst["cell_ip"]] = cell_traffic.get(inst["cell_ip"], 0) + traffic
-      # Also extract an routes, and create a connection between the route and the AI
-      if (data[key]["routes"] != None):
-        for r in data[key]["routes"]:
-          routes[r] = r
-          connections.append(make_conn(r, inst_name, traffic))
+    if (isinstance(data[key]["instances"], list)):
+      for inst in data[key]["instances"]:
+        # Create a Node for the AI
+        inst_name = "{0}/{1}".format(key, inst["index"])
+        app_inst = make_node(inst_name, traffic)
+        app_inst["notices"] = check_for_notices_node(inst)
+        app_instances.append(app_inst)
+        # Create a Connection between the Reported Cell IP and the AI Name
+        c = make_conn(inst_name, inst["cell_ip"], traffic)
+        c["notices"] = check_for_notices_conn(data[key])
+        connections.append(c)
+        # Also Keep track of the Cell Nodes, we will append these to the master list later
+        cells[inst["cell_ip"]] = make_node(inst["cell_ip"])
+        cell_traffic[inst["cell_ip"]] = cell_traffic.get(inst["cell_ip"], 0) + traffic
+        # Also extract an routes, and create a connection between the route and the AI
+        if (data[key]["routes"] != None):
+          for r in data[key]["routes"]:
+            routes[r] = r
+            connections.append(make_conn(r, inst_name, traffic))
 
   # Copy the whole list of AI's as a starting point for the master node list
   nodes = app_instances
