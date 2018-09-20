@@ -3,10 +3,23 @@
 import calendar
 import time
 import json
+import logging
+import sys
 import ssl
 import urllib.request
 from pprint import pprint
 
+
+# Constants for warning checks
+THRESHOLD_CPU_CRIT        = 50
+THRESHOLD_CPU_WARN        = 25
+THRESHOLD_RPS_CRIT        = 500
+THRESHOLD_RPS_WARN        = 100
+THRESHOLD_RUNNING_STATE   = "RUNNING"
+
+NOTICE_INFO               = 0
+NOTICE_WARN               = 1
+NOTICE_CRIT               = 2
 
 
 def app(environ, start_response):
@@ -66,18 +79,24 @@ def make_conn(src, trg, normal = -1, warning = -1, danger = -1, notices = []):
 
 def check_for_notices_node(inst_data = {}):
   n = []
+  cpu = int(inst_data["cpu_usage"])
   # What kind of notices/alerts can we generate for the NODE??
-  if (int(inst_data["cpu_usage"]) > 25):
-    n.append(make_notice("CPU usage is slightly high at {0}".format(inst_data["cpu_usage"])))
-  if (inst_data["state"] != "RUNNING"):
-    n.append(make_notice("Instance is not in a RUNNING state!", 2))
+  if (cpu > THRESHOLD_CPU_CRIT):
+    n.append(make_notice("CPU usage surpassed CRITICAL level at {0}".format(cpu), NOTICE_WARN))
+  elif (cpu > THRESHOLD_CPU_WARN):
+    n.append(make_notice("CPU usage surpassed WARNING level at {0}".format(cpu), NOTICE_INFO))
+  if (inst_data["state"] != THRESHOLD_RUNNING_STATE):
+    n.append(make_notice("Instance is not in a RUNNING state!", NOTICE_CRIT))
   return n
 
-def check_for_notices_conn(conn_data = {}):
+def check_for_notices_conn(conn_data = {}, age = 1):
   n = []
+  adjusted_traffic = int((conn_data["http_good_count"] +  conn_data["http_error_count"]) / age)
   # What kind of notices/alerts can we generate for the Connection??
-  if (conn_data["event_count"] > 100):
-    n.append(make_notice("RPS slightly high at {0}".format(conn_data["event_count"])))
+  if (adjusted_traffic > THRESHOLD_RPS_CRIT):
+    n.append(make_notice("RPS surpassed CRITICAL level at {0}".format(adjusted_traffic), NOTICE_WARN))
+  elif (adjusted_traffic > THRESHOLD_RPS_WARN):
+    n.append(make_notice("RPS surpassed WARNING level at {0}".format(adjusted_traffic), NOTICE_INFO))
   return n
 
 
@@ -97,6 +116,10 @@ def parse_metrics_json(data, exclude_orgs = [], only_orgs = []):
   volume = 0
   http_good = 0
   http_bad = 0
+  stats_since = sys.maxsize
+  stats_temp = 0
+  stats_age = 1
+  now = round(time.time())
 
   for key in data:
     # Check to see if we want to exclude applications within this ORG
@@ -105,6 +128,17 @@ def parse_metrics_json(data, exclude_orgs = [], only_orgs = []):
     # Check to see if only_orgs is non-empty, in which case we only want a specific collection or ORGs
     if (len(only_orgs) > 0 and data[key]["organization"]["name"] not in only_orgs):
       continue
+    # How old is the data that we're processing here?
+    stats_temp = data[key].get("stats_since", (round(time.time()) - 1) )
+    if (stats_temp < stats_since):
+      stats_since = stats_temp
+    stats_age = (now - stats_since)
+    # Trim the age of the data if it is very fresh (smooths rough edges with such a small sample size)
+    if stats_age < 5:
+      stats_age -= 1
+    # Guard against DIV BY ZERO
+    if stats_age < 1:
+      stats_age = 1
     # The total volume of traffic for this foundation
     traffic = (data[key]["http_good_count"] + data[key]["http_error_count"])
     volume = volume + traffic
@@ -119,7 +153,7 @@ def parse_metrics_json(data, exclude_orgs = [], only_orgs = []):
         app_instances.append(app_inst)
         # Create a Connection between the Reported Cell IP and the AI Name
         c = make_conn(inst_name, inst["cell_ip"], traffic)
-        c["notices"] = check_for_notices_conn(data[key])
+        c["notices"] = check_for_notices_conn(data[key], stats_age)
         connections.append(c)
         # Also Keep track of the Cell Nodes, we will append these to the master list later
         cells[inst["cell_ip"]] = make_node(inst["cell_ip"])
@@ -142,6 +176,8 @@ def parse_metrics_json(data, exclude_orgs = [], only_orgs = []):
   for cell in cells:
     nodes.append(cells[cell])
 
+  # DEBUG INFO
+  logging.warning("Stats AGE is " + str(stats_age))
 
   # The resulting Region can now take shape
   n_pcf = {}
@@ -152,13 +188,13 @@ def parse_metrics_json(data, exclude_orgs = [], only_orgs = []):
   n_pcf["metadata"] = {}
   n_pcf["updated"] = int(round(time.time() * 1000))
   n_pcf["props"] = {}
-  n_pcf["maxVolume"] = volume
-  n_pcf["http_good"] = http_good
-  n_pcf["http_bad"] = http_bad
-  if (volume == 0):
+  n_pcf["maxVolume"] = int(volume / stats_age)
+  n_pcf["http_good"] = int(http_good / stats_age)
+  n_pcf["http_bad"] = int(http_bad / stats_age)
+  if (n_pcf["maxVolume"] == 0):
     n_pcf["error_rate"] = 0.0
   else:
-    n_pcf["error_rate"] = (http_bad / volume)
+    n_pcf["error_rate"] = (n_pcf["http_bad"] / n_pcf["maxVolume"])
 
   # return the completed object representation
   return n_pcf
@@ -185,7 +221,7 @@ def main():
   # First Foundation
   pcf_one = {}
   pcf_one["name"] = "pcf-az-central-system"
-  pcf_one["displayName"] = "Azure CentralUS [system]"
+  pcf_one["displayName"] = "AZR CUS [system]"
   pcf_one["json_url"] = "https://app-metrics-nozzle.apps.az.dav3.io/api/apps"
   pcf_one["exclude_orgs"] = []
   pcf_one["only_orgs"] = ["system"]
@@ -193,7 +229,7 @@ def main():
   # Second Foundation (which is really just the first, repeated with different filters)
   pcf_two = {}
   pcf_two["name"] = "pcf-az-central-non-system"
-  pcf_two["displayName"] = "Azure CentralUS [non-system]"
+  pcf_two["displayName"] = "AZR CUS [!system]"
   pcf_two["json_url"] = "https://app-metrics-nozzle.apps.az.dav3.io/api/apps"
   pcf_two["exclude_orgs"] = ["system"] 
   pcf_two["only_orgs"] = []
