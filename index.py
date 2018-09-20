@@ -11,8 +11,10 @@ from pprint import pprint
 
 
 # Constants for warning checks
+THRESHOLD_CPU_DANGER      = 75
 THRESHOLD_CPU_CRIT        = 50
 THRESHOLD_CPU_WARN        = 25
+THRESHOLD_RPS_DANGER      = 1000
 THRESHOLD_RPS_CRIT        = 500
 THRESHOLD_RPS_WARN        = 100
 THRESHOLD_RUNNING_STATE   = "RUNNING"
@@ -81,7 +83,9 @@ def check_for_notices_node(inst_data = {}):
   n = []
   cpu = int(inst_data["cpu_usage"])
   # What kind of notices/alerts can we generate for the NODE??
-  if (cpu > THRESHOLD_CPU_CRIT):
+  if (cpu > THRESHOLD_CPU_DANGER):
+    n.append(make_notice("CPU usage surpassed DANGER level at {0}".format(cpu), NOTICE_CRIT))
+  elif (cpu > THRESHOLD_CPU_CRIT):
     n.append(make_notice("CPU usage surpassed CRITICAL level at {0}".format(cpu), NOTICE_WARN))
   elif (cpu > THRESHOLD_CPU_WARN):
     n.append(make_notice("CPU usage surpassed WARNING level at {0}".format(cpu), NOTICE_INFO))
@@ -93,7 +97,9 @@ def check_for_notices_conn(conn_data = {}, age = 1):
   n = []
   adjusted_traffic = int((conn_data["http_good_count"] +  conn_data["http_error_count"]) / age)
   # What kind of notices/alerts can we generate for the Connection??
-  if (adjusted_traffic > THRESHOLD_RPS_CRIT):
+  if ():
+    n.append(make_notice("RPS surpassed DANGER level at {0}".format(adjusted_traffic), NOTICE_CRIT))
+  elif (adjusted_traffic > THRESHOLD_RPS_CRIT):
     n.append(make_notice("RPS surpassed CRITICAL level at {0}".format(adjusted_traffic), NOTICE_WARN))
   elif (adjusted_traffic > THRESHOLD_RPS_WARN):
     n.append(make_notice("RPS surpassed WARNING level at {0}".format(adjusted_traffic), NOTICE_INFO))
