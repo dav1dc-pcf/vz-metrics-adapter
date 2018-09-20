@@ -19,9 +19,37 @@ THRESHOLD_RPS_CRIT        = 500
 THRESHOLD_RPS_WARN        = 100
 THRESHOLD_RUNNING_STATE   = "RUNNING"
 
+# Constants for Notice INT's
 NOTICE_INFO               = 0
 NOTICE_WARN               = 1
 NOTICE_CRIT               = 2
+
+# Define the foundations to process in an array
+foundations = {}
+
+# First Foundation
+pcf_one = {}
+pcf_one["name"] = "pcf-secondary"
+pcf_one["displayName"] = "Secondary PCF"
+pcf_one["json_url"] = "https://app-metrics-nozzle.apps.az.dav3.io/api/apps"
+pcf_one["exclude_orgs"] = []
+pcf_one["only_orgs"] = ["second-foundation"]
+
+# Second Foundation (which is really just the first, repeated with different filters)
+pcf_two = {}
+pcf_two["name"] = "pcf-primary"
+pcf_two["displayName"] = "Primary PCF"
+pcf_two["json_url"] = "https://app-metrics-nozzle.apps.az.dav3.io/api/apps"
+pcf_two["exclude_orgs"] = ["system", "second-foundation"]
+pcf_two["only_orgs"] = []
+
+# Pack the list of foundations to process into the hash "foundations"
+foundations[pcf_one["name"]] = pcf_one
+foundations[pcf_two["name"]] = pcf_two
+
+#
+# END Configuration
+#
 
 
 def app(environ, start_response):
@@ -220,28 +248,6 @@ def main():
   n_internet["connections"] = []
   n_internet["class"] = "normal"
   n_internet["metadata"] = {}
-
-  # Define the foundations to process in an array
-  foundations = {}
-
-  # First Foundation
-  pcf_one = {}
-  pcf_one["name"] = "pcf-az-central-system"
-  pcf_one["displayName"] = "AZR CUS [system]"
-  pcf_one["json_url"] = "https://app-metrics-nozzle.apps.az.dav3.io/api/apps"
-  pcf_one["exclude_orgs"] = []
-  pcf_one["only_orgs"] = ["system"]
-
-  # Second Foundation (which is really just the first, repeated with different filters)
-  pcf_two = {}
-  pcf_two["name"] = "pcf-az-central-non-system"
-  pcf_two["displayName"] = "AZR CUS [!system]"
-  pcf_two["json_url"] = "https://app-metrics-nozzle.apps.az.dav3.io/api/apps"
-  pcf_two["exclude_orgs"] = ["system"] 
-  pcf_two["only_orgs"] = []
-
-  foundations[pcf_one["name"]] = pcf_one
-  foundations[pcf_two["name"]] = pcf_two
 
   # Ensure that we can read from sites using self-signed SSL
   myssl = ssl.create_default_context()
