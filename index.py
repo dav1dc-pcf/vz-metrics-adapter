@@ -81,7 +81,7 @@ def make_notice(title, severity = 0, link = -1):
     notice["link"] = link
   return notice
 
-def make_node(name, normal = -1, warning = -1, danger = -1, children = [], notices = []):
+def make_node(name, traffic = -1, errors = -1, children = [], notices = []):
   streaming = {}
   streaming["streaming"] = 1
   node = {}
@@ -90,11 +90,11 @@ def make_node(name, normal = -1, warning = -1, danger = -1, children = [], notic
   node["notices"] = notices
   node["metadata"] = streaming
   node["renderer"] = "focusedChild"
-  if (not (normal != -1 and warning != -1 and danger != -1)):
-    node["metrics"] = make_metrics(normal, warning, danger)
+  if (traffic != -1 and errors != -1):
+      node["metrics"] = make_metrics(traffic, danger=errors)
   return node
 
-def make_conn(src, trg, normal = -1, warning = -1, danger = -1, notices = []):
+def make_conn(src, trg, traffic = -1, errors = -1, notices = []):
   streaming = {}
   streaming["streaming"] = 1
   conn = {}
@@ -102,8 +102,8 @@ def make_conn(src, trg, normal = -1, warning = -1, danger = -1, notices = []):
   conn["target"] = trg
   conn["metadata"] = streaming
   conn["notices"] = notices
-  if (not (normal != -1 and warning != -1 and danger != -1)):
-    conn["metrics"] = make_metrics(normal, warning, danger)
+  if (traffic != -1 and errors != -1):
+      conn["metrics"] = make_metrics(traffic, danger=errors)
   return conn
 
 
@@ -182,11 +182,11 @@ def parse_metrics_json(data, exclude_orgs = [], only_orgs = []):
       for inst in data[key]["instances"]:
         # Create a Node for the AI
         inst_name = "{0}/{1}".format(key, inst["index"])
-        app_inst = make_node(inst_name, traffic)
+        app_inst = make_node(inst_name, int(data[key]["http_good_count"]/stats_age), int(data[key]["http_error_count"]/stats_age))
         app_inst["notices"] = check_for_notices_node(inst)
         app_instances.append(app_inst)
         # Create a Connection between the Reported Cell IP and the AI Name
-        c = make_conn(inst_name, inst["cell_ip"], traffic)
+        c = make_conn(inst_name, inst["cell_ip"], int(data[key]["http_good_count"]/stats_age), int(data[key]["http_error_count"]/stats_age))
         c["notices"] = check_for_notices_conn(data[key], stats_age)
         connections.append(c)
         # Also Keep track of the Cell Nodes, we will append these to the master list later
@@ -196,7 +196,7 @@ def parse_metrics_json(data, exclude_orgs = [], only_orgs = []):
         if (data[key]["routes"] != None):
           for r in data[key]["routes"]:
             routes[r] = r
-            connections.append(make_conn(r, inst_name, traffic))
+            connections.append(make_conn(r, inst_name, int(data[key]["http_good_count"]/stats_age), int(data[key]["http_error_count"]/stats_age)))
 
   # Copy the whole list of AI's as a starting point for the master node list
   nodes = app_instances
@@ -273,7 +273,7 @@ def main():
     conn1["target"] = site_name
     conn1["class"] = "normal"
     conn1["notices"] = []
-    conn1["metrics"] = make_metrics(site_data["maxVolume"], site_data["error_rate"], int(site_data["maxVolume"] * site_data["error_rate"]) )
+    conn1["metrics"] = make_metrics(site_data["http_good"], site_data["error_rate"], site_data["http_bad"] )
 
     d_conns.append(conn1)
     d_nodes.append(site_data)
