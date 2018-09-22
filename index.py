@@ -14,9 +14,21 @@ from pprint import pprint
 THRESHOLD_CPU_DANGER      = 75
 THRESHOLD_CPU_CRIT        = 50
 THRESHOLD_CPU_WARN        = 25
+
 THRESHOLD_RPS_DANGER      = 1000
 THRESHOLD_RPS_CRIT        = 500
 THRESHOLD_RPS_WARN        = 100
+
+# The next 2 sets of thresholds are expressed as % used
+THRESHOLD_MEM_DANGER      = 90
+THRESHOLD_MEM_CRIT        = 75
+THRESHOLD_MEM_WARN        = 60
+
+THRESHOLD_DISK_DANGER     = 90
+THRESHOLD_DISK_CRIT       = 80
+THRESHOLD_DISK_WARN       = 75
+
+# Add a notice to the node if not in the state defined below
 THRESHOLD_RUNNING_STATE   = "RUNNING"
 
 # Constants for Notice INT's
@@ -31,7 +43,7 @@ foundations = {}
 pcf_one = {}
 pcf_one["name"] = "pcf-secondary"
 pcf_one["displayName"] = "Secondary PCF"
-pcf_one["json_url"] = "https://app-metrics-nozzle.apps.az.dav3.io/api/apps"
+pcf_one["json_url"] = "https://app-metrics-nozzle.apps.your-pcf.com/api/apps"
 pcf_one["exclude_orgs"] = []
 pcf_one["only_orgs"] = ["second-foundation"]
 
@@ -39,7 +51,7 @@ pcf_one["only_orgs"] = ["second-foundation"]
 pcf_two = {}
 pcf_two["name"] = "pcf-primary"
 pcf_two["displayName"] = "Primary PCF"
-pcf_two["json_url"] = "https://app-metrics-nozzle.apps.az.dav3.io/api/apps"
+pcf_two["json_url"] = "https://app-metrics-nozzle.apps.your-pcf.com/api/apps"
 pcf_two["exclude_orgs"] = ["system", "second-foundation"]
 pcf_two["only_orgs"] = []
 
@@ -107,18 +119,43 @@ def make_conn(src, trg, traffic = -1, errors = -1, notices = []):
   return conn
 
 
-def check_for_notices_node(inst_data = {}):
+def check_for_notices_node(inst_data = {}, env_summary = {}):
   n = []
   cpu = int(inst_data["cpu_usage"])
-  # What kind of notices/alerts can we generate for the NODE??
+  # Is the instance in the desired state?
+  if (inst_data["state"] != THRESHOLD_RUNNING_STATE):
+    n.append(make_notice("Instance is not in a RUNNING state!", NOTICE_CRIT))
+
+  # What kind of notices/alerts can we generate for the container's CPU usage??
   if (cpu > THRESHOLD_CPU_DANGER):
     n.append(make_notice("CPU usage surpassed DANGER level at {0}".format(cpu), NOTICE_CRIT))
   elif (cpu > THRESHOLD_CPU_CRIT):
     n.append(make_notice("CPU usage surpassed CRITICAL level at {0}".format(cpu), NOTICE_WARN))
   elif (cpu > THRESHOLD_CPU_WARN):
     n.append(make_notice("CPU usage surpassed WARNING level at {0}".format(cpu), NOTICE_INFO))
-  if (inst_data["state"] != THRESHOLD_RUNNING_STATE):
-    n.append(make_notice("Instance is not in a RUNNING state!", NOTICE_CRIT))
+
+  # What kind of notices/alerts can we generate for the container's Memory usage??
+  base_mem = env_summary["total_memory_configured"]
+  if (base_mem != 0):
+    mem_percent = int(inst_data["memory_usage"] / base_mem)
+    if (mem_percent > THRESHOLD_MEM_DANGER):
+      n.append(make_notice("Memory usage surpassed DANGER level at {0}%".format(mem_percent), NOTICE_CRIT))
+    elif (mem_percent > THRESHOLD_MEM_CRIT):
+      n.append(make_notice("Memory usage surpassed CRITICAL level at {0}%".format(mem_percent), NOTICE_WARN))
+    elif (mem_percent > THRESHOLD_MEM_WARN):
+      n.append(make_notice("Memory usage surpassed WARNING level at {0}%".format(mem_percent), NOTICE_INFO))
+
+  # What kind of notices/alerts can we generate for the container's Disk usage??
+  base_disk = env_summary["total_disk_configured"]
+  if (base_disk != 0):
+    disk_percent = int(inst_data["disk_usage"] / base_disk)
+    if (disk_percent > THRESHOLD_DISK_DANGER):
+      n.append(make_notice("Disk usage surpassed DANGER level at {0}%".format(disk_percent), NOTICE_CRIT))
+    elif (disk_percent > THRESHOLD_DISK_CRIT):
+      n.append(make_notice("Disk usage surpassed CRITICAL level at {0}%".format(disk_percent), NOTICE_WARN))
+    elif (disk_percent > THRESHOLD_DISK_WARN):
+      n.append(make_notice("Disk usage surpassed WARNING level at {0}%".format(disk_percent), NOTICE_INFO))
+
   return n
 
 def check_for_notices_conn(conn_data = {}, age = 1):
@@ -183,7 +220,7 @@ def parse_metrics_json(data, exclude_orgs = [], only_orgs = []):
         # Create a Node for the AI
         inst_name = "{0}/{1}".format(key, inst["index"])
         app_inst = make_node(inst_name, int(data[key]["http_good_count"]/stats_age), int(data[key]["http_error_count"]/stats_age))
-        app_inst["notices"] = check_for_notices_node(inst)
+        app_inst["notices"] = check_for_notices_node(inst, data[key]["environment_summary"])
         app_instances.append(app_inst)
         # Create a Connection between the Reported Cell IP and the AI Name
         c = make_conn(inst_name, inst["cell_ip"], int(data[key]["http_good_count"]/stats_age), int(data[key]["http_error_count"]/stats_age))
