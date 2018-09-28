@@ -65,4 +65,4 @@ foundations[pcf_two["name"]] = pcf_two
 #
 ```
 
-Once fully configured, push an insance to your PCF/CF and then ensure one has deployed [vizceral-app-metrics-ui](https://github.com/dav1dc-pcf/vizceral-app-metrics-ui) to sit infront of the adapter.
+Once fully configured, push an instance to your PCF/CF and then ensure one has deployed [vizceral-app-metrics-ui](https://github.com/dav1dc-pcf/vizceral-app-metrics-ui) to sit infront of the adapter.
