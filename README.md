@@ -6,7 +6,7 @@ This project acts as the literal translation layer between the data presented fr
 
 Configuration is relatively straight forward using contsants and variables at the top of `index.py` 
 
-The Notices thresholds for information/warning/danger can be modified by tweaking the following constants:
+The **Notice** thresholds for information/warning/danger graph decorations can be modified by tweaking the following constants:
 
 ```
 # Constants for warning checks
@@ -51,9 +51,9 @@ pcf_two["exclude_orgs"] = ["system", "second-foundation"]
 pcf_two["only_orgs"] = []
 ```
 
-Note that **** and **** can be used to include/exclude ORGs to reduce some of the "clutter" in the visualization.
+Note that **exclude_orgs** and **only_orgs** can be used to selectively include/exclude certain ORGs to reduce some of the "clutter" in the visualization.
 
-Finally, ensure that ever Foundation you have defined has been packed into the array which will be iterated over to build the final data model:
+Finally, ensure that every Foundation one defines has been packed into the array which will be iterated over to build the final data model:
 
 ```
 # Pack the list of foundations to process into the hash "foundations"
@@ -65,4 +65,4 @@ foundations[pcf_two["name"]] = pcf_two
 #
 ```
 
-Once fully configured, push an insance to your PCF/CF, and then ensure you have deployed [vizceral-app-metrics-ui](https://github.com/dav1dc-pcf/vizceral-app-metrics-ui).
+Once fully configured, push an insance to your PCF/CF and then ensure one has deployed [vizceral-app-metrics-ui](https://github.com/dav1dc-pcf/vizceral-app-metrics-ui) to sit infront of the adapter.
